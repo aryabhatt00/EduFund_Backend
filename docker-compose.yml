@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  mysql-banking:
+    image: mysql:8.0
+    container_name: mysql-banking
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bankingdb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  springboot-banking:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot-banking
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql-banking:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-banking:3306/bankingdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+  frontend:
+    build:
+      context: ./BANKING-FRONTEND-MASTER
+    ports:
+      - "3000:80"
+    depends_on:
+      - springboot-banking
+
+volumes:
+  mysql_data:

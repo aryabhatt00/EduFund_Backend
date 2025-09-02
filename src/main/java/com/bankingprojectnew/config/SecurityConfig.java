@@ -74,7 +74,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000")); // Frontend origin
+        config.setAllowedOrigins(List.of("http://localhost:3000","https://edufund-indol.vercel.app",
+        	    "https://edufund-git-main-aryas-projects-645b8d28.vercel.app",
+        	    "https://edufund-5fdti3e1f-aryas-projects-645b8d28.vercel.app"
+)); // Frontend origin
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

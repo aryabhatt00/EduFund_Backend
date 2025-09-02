@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import com.bankingprojectnew.DTO.OtpTransactionRequest;
 import com.bankingprojectnew.DTO.OtpVerifyTransactionRequest;
@@ -91,7 +93,9 @@ public class BankingController {
         return "BankingController is working!";
     }
     @GetMapping("/transactions")
+    @PreAuthorize("hasRole('CUSTOMER')")
     public TransactionHistoryDTO getTransactions(@RequestParam long accountNumber) {
+
         Account account = bankingService.getAccountByAccountNumber(accountNumber);
         List<BankTransaction> transactions = bankTransactionRepository.findByTransactionAccount(account);
 

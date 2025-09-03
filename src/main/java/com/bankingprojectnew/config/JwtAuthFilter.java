@@ -61,9 +61,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 Claims claims = jwtUtil.extractAllClaims(token);
                 String username = claims.getSubject();
 
-                List<SimpleGrantedAuthority> authorities = ((List<?>) claims.get("authorities")).stream()
+                List<SimpleGrantedAuthority> authorities;
+
+                if (claims.get("authorities") != null) {
+                    authorities = ((List<?>) claims.get("authorities")).stream()
                         .map(role -> new SimpleGrantedAuthority(role.toString()))
                         .collect(Collectors.toList());
+                } else if (claims.get("role") != null) {
+                    authorities = List.of(new SimpleGrantedAuthority("ROLE_" + claims.get("role").toString()));
+                } else {
+                    authorities = List.of(); // fallback if neither claim is present
+                }
+
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(username, null, authorities);

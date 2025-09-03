@@ -12,12 +12,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class JwtUtil {
 
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    
+	  private final Key key;
+
+	    public JwtUtil(@Value("${jwt.secret}") String secret) {
+	        this.key = Keys.hmacShaKeyFor(secret.getBytes());
+	    }
 
     
     public String generateToken(String username, String role) {

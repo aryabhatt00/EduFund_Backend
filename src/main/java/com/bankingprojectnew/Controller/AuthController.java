@@ -19,11 +19,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest authRequest) {
         if ("admin".equals(authRequest.getUsername()) && "admin123".equals(authRequest.getPassword())) {
-            String token = jwtUtil.generateToken(authRequest.getUsername());
+            String token = jwtUtil.generateToken(authRequest.getUsername(), "ADMIN"); 
             return ResponseEntity.ok(Map.of("token", token));
         }
         return ResponseEntity.status(401).body("Invalid credentials");
     }
+
 
     static class AuthRequest {
         private String username;

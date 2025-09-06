@@ -22,6 +22,7 @@ import com.bankingprojectnew.Entity.BankTransaction;
 import com.bankingprojectnew.Repository.BankTransactionRepository;
 import com.bankingprojectnew.Service.BankingService;
 import com.bankingprojectnew.Service.OtpService;
+import org.springframework.beans.factory.annotation.Value;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController

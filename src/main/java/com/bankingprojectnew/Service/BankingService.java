@@ -130,22 +130,21 @@ public class BankingService {
 
     @Autowired
     private CustomerRepository customerRepository;
+
     public boolean deleteAccountByNumber(long accountNumber) {
         Optional<Account> accountOpt = accountRepository.findByAccountNumber(accountNumber);
         
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
 
-            // Delete all transactions related to this account
-            bankTransactionRepository.deleteByTransactionAccount(account);
-
-            // Remove customer if exists
+            // Remove associated customer (if any)
             if (account.getCustomer() != null) {
                 customerRepository.delete(account.getCustomer());
             }
 
-            // Delete the account last
+            // ✅ Delete account (cascades to transactions)
             accountRepository.delete(account);
+
             return true;
         }
 

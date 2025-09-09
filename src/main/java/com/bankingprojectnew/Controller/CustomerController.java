@@ -129,10 +129,17 @@ public class CustomerController {
 
         String token = jwtService.generateToken(customer.getCustomerEmail(), "CUSTOMER");
 
+        // ✅ Safely fetch account number (null check)
+        Long accountNumber = null;
+        if (customer.getCustomerAccount() != null) {
+            accountNumber = customer.getCustomerAccount().getAccountNumber();
+        }
+
         CustomerLoginResponseDTO responseDTO = new CustomerLoginResponseDTO();
         responseDTO.setToken(token);
         responseDTO.setName(customer.getCustomerName());
         responseDTO.setEmail(customer.getCustomerEmail());
+        responseDTO.setAccountNumber(accountNumber); // ✅ Set account number in response
 
         return ResponseEntity.ok(responseDTO);
     }

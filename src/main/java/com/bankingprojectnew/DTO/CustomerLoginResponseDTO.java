@@ -4,19 +4,18 @@ public class CustomerLoginResponseDTO {
     private String token;
     private String name;
     private String email;
+    private Long accountNumber; 
 
-    // ✅ Default constructor (required for object creation via setters)
-    public CustomerLoginResponseDTO() {
-    }
+    public CustomerLoginResponseDTO() {}
 
-    // ✅ Parameterized constructor
-    public CustomerLoginResponseDTO(String token, String name, String email) {
+    public CustomerLoginResponseDTO(String token, String name, String email, Long accountNumber) {
         this.token = token;
         this.name = name;
         this.email = email;
+        this.accountNumber = accountNumber;
     }
 
-    // ✅ Getters and setters
+    // Getters and Setters
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
 
@@ -25,4 +24,7 @@ public class CustomerLoginResponseDTO {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public Long getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(Long accountNumber) { this.accountNumber = accountNumber; }
 }

@@ -42,15 +42,19 @@ public class CustomerController {
     // 1. Create new customer
     @PostMapping("/create")
     public Map<String, Object> createCustomer(@RequestBody @Valid Customer customer) {
-        boolean exists = customerRepository.existsByCustomerEmail(customer.getCustomerEmail())
-                || customerRepository.existsByCustomerPhone(customer.getCustomerPhone());
-
+        
         Map<String, Object> response = new HashMap<>();
 
-        if (exists) {
-            response.put("message", "Use unique customer details");
+        if (customerRepository.existsByCustomerEmail(customer.getCustomerEmail())) {
+            response.put("message", "Email already exists");
             return response;
         }
+
+        if (customerRepository.existsByCustomerPhone(customer.getCustomerPhone())) {
+            response.put("message", "Phone number already exists");
+            return response;
+        }
+
 
         if (customer.getPassword() != null) {
             customer.setPassword(passwordEncoder.encode(customer.getPassword()));

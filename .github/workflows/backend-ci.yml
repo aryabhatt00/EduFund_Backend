@@ -7,23 +7,22 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Java 21
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
           cache: maven
 
-      - name: Run Maven tests
+      - name: Build with Maven
         run: mvn clean verify
 
       - name: Build Docker image
-        run: docker build -t edufund-backend:ci .
-
+        run: docker build -t backend-ci .

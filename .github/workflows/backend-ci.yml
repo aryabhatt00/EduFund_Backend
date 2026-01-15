@@ -31,4 +31,10 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Build Docker image
-        run: docker build -t banking-backend .
+        run: docker build -t ghcr.io/aryabhatt00/banking-backend:latest .
+
+      - name: Login to GHCR
+        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u aryabhatt00 --password-stdin
+
+      - name: Push Docker image to GHCR
+        run: docker push ghcr.io/aryabhatt00/banking-backend:latest

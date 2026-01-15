@@ -29,3 +29,6 @@ jobs:
 
       - name: Build backend
         run: mvn clean package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t banking-backend .

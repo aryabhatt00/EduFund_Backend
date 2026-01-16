@@ -7,17 +7,18 @@ phases:
       - aws --version
       - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - REGION=us-east-1
+      - ECR_REPO=edufund-backend
       - ECR_URI=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_URI
 
   build:
     commands:
       - echo Build started on `date`
-      - mvn clean package -DskipTests
-      - docker build -t edufund-backend .
+      - docker build -t $ECR_REPO:latest .
 
   post_build:
     commands:
       - echo Pushing image to ECR
-      - docker tag edufund-backend:latest $ECR_URI/edufund-backend:latest
-      - docker push $ECR_URI/edufund-backend:latest
+      - docker tag $ECR_REPO:latest $ECR_URI/$ECR_REPO:latest
+      - docker push $ECR_URI/$ECR_REPO:latest
+      - echo Build completed on `date`

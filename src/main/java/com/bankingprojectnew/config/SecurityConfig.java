@@ -58,7 +58,8 @@ public class SecurityConfig {
             	        "/bank/request-otp",
             	        "/bank/verify-otp",
             	        "/customer/login",
-            	        "/bank/test"
+            	        "/bank/test",
+                        "/actuator/**"
             	    ).permitAll()
             	    .anyRequest().authenticated()
             	)

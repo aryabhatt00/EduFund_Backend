@@ -10,4 +10,10 @@ public class HomeController {
     public String home() {
         return "Spring Boot is working!";
     }
+
+    @GetMapping("/health")
+public String health() {
+    return "CI_CD_TEST_1";
+}
+
 }

@@ -13,12 +13,10 @@ phases:
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
       - echo "Fetching EC2 SSH key from Secrets Manager"
-      - aws secretsmanager get-secret-value \
-          --secret-id edufund-ec2-ssh-key \
-          --query SecretString \
-          --output text > /tmp/id_rsa
+      - aws secretsmanager get-secret-value --secret-id edufund-ec2-ssh-key --query SecretString --output text > /tmp/id_rsa
 
       - chmod 600 /tmp/id_rsa
+      - echo "Validating SSH key"
       - head -n 2 /tmp/id_rsa
 
   build:
@@ -27,35 +25,22 @@ phases:
       - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
 
       - echo "Tagging Docker image"
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG \
-          $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
   post_build:
     commands:
       - echo "Pushing image to ECR"
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
 
-      - echo "Deploying to EC2 via SSH"
+      - echo "Testing SSH connectivity"
+      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o ConnectTimeout=10 -i /tmp/id_rsa ec2-user@$EC2_PUBLIC_IP "echo SSH_OK"
 
-      - ssh -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=no \
-            -o ConnectTimeout=10 \
-            -i /tmp/id_rsa \
-            ec2-user@$EC2_PUBLIC_IP "echo SSH_OK"
+      - echo "Stopping existing container"
+      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@$EC2_PUBLIC_IP "docker stop edufund-backend || true"
+      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@$EC2_PUBLIC_IP "docker rm edufund-backend || true"
 
-      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa \
-          ec2-user@$EC2_PUBLIC_IP "docker stop edufund-backend || true"
+      - echo "Pulling latest image on EC2"
+      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@$EC2_PUBLIC_IP "docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
 
-      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa \
-          ec2-user@$EC2_PUBLIC_IP "docker rm edufund-backend || true"
-
-      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa \
-          ec2-user@$EC2_PUBLIC_IP \
-          "docker pull $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
-
-      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa \
-          ec2-user@$EC2_PUBLIC_IP \
-          "docker run -d -p 8080:8080 \
-           --env-file /home/ec2-user/.env \
-           --name edufund-backend \
-           $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+      - echo "Starting new container"
+      - ssh -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -i /tmp/id_rsa ec2-user@$EC2_PUBLIC_IP "docker run -d -p 8080:8080 --env-file /home/ec2-user/.env --name edufund-backend $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
